@@ -177,27 +177,23 @@
                       CanUserReorderColumns="True"
                       CanUserResizeColumns="True"
                       CanUserSortColumns="True"
-                      PreviewMouseRightButtonDown="ResultsGrid_PreviewMouseRightButtonDown">
-
-                <DataGrid.ContextMenu>
-                    <ContextMenu x:Name="GridContextMenu" Style="{x:Null}">
-                        <MenuItem x:Name="MenuCopyCell" Header="Copy Cell" Click="MenuCopyCell_Click">
-                            <MenuItem.Icon>
-                                <TextBlock Text="📋" FontSize="12"/>
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem x:Name="MenuCopyValue" Header="Copy Value" Click="MenuCopyValue_Click"/>
-                        <MenuItem x:Name="MenuCopyTagName" Header="Copy Field Name" Click="MenuCopyTagName_Click"/>
-                        <Separator/>
-                        <MenuItem x:Name="MenuCopyRow" Header="Copy Row (Tab-separated)" Click="MenuCopyRow_Click"/>
-                    </ContextMenu>
-                </DataGrid.ContextMenu>
                       HeadersVisibility="Column"
                       RowHeight="26"
                       BorderThickness="0"
                       Background="Transparent"
                       VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Auto">
+                      HorizontalScrollBarVisibility="Auto"
+                      PreviewMouseRightButtonDown="ResultsGrid_PreviewMouseRightButtonDown">
+
+                <DataGrid.ContextMenu>
+                    <ContextMenu Style="{x:Null}" Opened="GridContextMenu_Opened">
+                        <MenuItem Header="Copy Cell" Click="MenuCopyCell_Click"/>
+                        <MenuItem Header="Copy Value" Click="MenuCopyValue_Click"/>
+                        <MenuItem Header="Copy Field Name" Click="MenuCopyTagName_Click"/>
+                        <Separator/>
+                        <MenuItem Header="Copy Row (Tab-separated)" Click="MenuCopyRow_Click"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
 
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">

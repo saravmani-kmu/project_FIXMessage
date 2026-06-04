@@ -34,24 +34,40 @@ public class FIXParserService
 
     private List<string> SplitIntoMessages(string input)
     {
-        string normalized = NormalizeDelimiters(input.Trim());
+        // Split on newlines first — each non-empty line is treated as one message
+        // (handles copy-paste from log files where messages are on separate lines)
+        var lines = input
+            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(l => l.Trim())
+            .Where(l => !string.IsNullOrWhiteSpace(l));
 
-        // Split on "8=FIX" boundaries to handle multiple pasted messages
         var messages = new List<string>();
+        foreach (var line in lines)
+        {
+            string normalized = NormalizeDelimiters(line);
+            // Also handle concatenated messages on a single line (SOH8=FIX boundary)
+            messages.AddRange(SplitOnSohBoundary(normalized));
+        }
+
+        return messages.Where(m => !string.IsNullOrWhiteSpace(m)).ToList();
+    }
+
+    private IEnumerable<string> SplitOnSohBoundary(string normalized)
+    {
         int start = 0;
         while (start < normalized.Length)
         {
             int next = normalized.IndexOf($"{Soh}8=FIX", start + 1, StringComparison.Ordinal);
             if (next < 0)
             {
-                messages.Add(normalized[start..].Trim(Soh).Trim());
-                break;
+                string msg = normalized[start..].Trim(Soh);
+                if (!string.IsNullOrWhiteSpace(msg)) yield return msg;
+                yield break;
             }
-            messages.Add(normalized[start..(next)].Trim(Soh).Trim());
-            start = next + 1; // skip the SOH, start from "8=FIX"
+            string m = normalized[start..next].Trim(Soh);
+            if (!string.IsNullOrWhiteSpace(m)) yield return m;
+            start = next + 1;
         }
-
-        return messages.Where(m => !string.IsNullOrWhiteSpace(m)).ToList();
     }
 
     private string NormalizeDelimiters(string raw)

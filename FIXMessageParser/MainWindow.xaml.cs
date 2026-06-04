@@ -134,11 +134,17 @@ public partial class MainWindow : Window
 
         _rightClickedField = cell.DataContext as FIXField;
         _rightClickedColumn = cell.Column?.Header?.ToString() ?? string.Empty;
+    }
 
-        // Update "Copy Cell" header to show which column was right-clicked
-        MenuCopyCell.Header = string.IsNullOrEmpty(_rightClickedColumn)
-            ? "Copy Cell"
-            : $"Copy  \"{_rightClickedColumn}\"";
+    private void GridContextMenu_Opened(object sender, RoutedEventArgs e)
+    {
+        // Dynamically update the "Copy Cell" label to show which column was right-clicked
+        if (ResultsGrid.ContextMenu?.Items[0] is MenuItem copyCell)
+        {
+            copyCell.Header = string.IsNullOrEmpty(_rightClickedColumn)
+                ? "Copy Cell"
+                : $"Copy  \"{_rightClickedColumn}\"";
+        }
     }
 
     private void MenuCopyCell_Click(object sender, RoutedEventArgs e)
