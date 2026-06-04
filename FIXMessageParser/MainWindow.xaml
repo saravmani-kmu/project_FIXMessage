@@ -1,0 +1,304 @@
+﻿<Window x:Class="FIXMessageParser.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:conv="clr-namespace:FIXMessageParser.Converters"
+        Title="FIX Message Parser" Height="750" Width="1100"
+        Background="#F0F2F5" FontFamily="Segoe UI" FontSize="13">
+
+    <Window.Resources>
+        <conv:MessageIndexToBackgroundConverter x:Key="MsgBgConv"/>
+        <conv:SectionToForegroundConverter x:Key="SectionFgConv"/>
+        <conv:GroupCountTagToWeightConverter x:Key="GroupWeightConv"/>
+
+        <Style x:Key="PrimaryBtn" TargetType="Button">
+            <Setter Property="Padding" Value="16,6"/>
+            <Setter Property="Background" Value="#0078D4"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#006CBF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#005A9E"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryBtn" TargetType="Button" BasedOn="{StaticResource PrimaryBtn}">
+            <Setter Property="Background" Value="#6C757D"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#5A6268"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="OutlineBtn" TargetType="Button">
+            <Setter Property="Padding" Value="14,5"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#0078D4"/>
+            <Setter Property="BorderBrush" Value="#0078D4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E6F2FB"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#2D3748"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+            <Setter Property="BorderBrush" Value="#4A5568"/>
+        </Style>
+
+        <Style TargetType="DataGridCell">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="6,3"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Border Padding="{TemplateBinding Padding}"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="180"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title bar -->
+        <Border Grid.Row="0" Background="#2D3748" CornerRadius="6" Padding="14,10" Margin="0,0,0,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="FIX Message Parser  —  FIX 4.2" Foreground="White"
+                           FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" x:Name="DictionaryStatusText"
+                           Foreground="#A0AEC0" FontSize="11" VerticalAlignment="Center"
+                           Text="Dictionary: built-in FIX 4.2"/>
+            </Grid>
+        </Border>
+
+        <!-- Input area -->
+        <Border Grid.Row="1" Background="White" CornerRadius="6"
+                BorderBrush="#CBD5E0" BorderThickness="1" Margin="0,0,0,8">
+            <Grid>
+                <TextBox x:Name="InputTextBox"
+                         AcceptsReturn="True" AcceptsTab="False"
+                         VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto"
+                         TextWrapping="NoWrap"
+                         FontFamily="Consolas" FontSize="12"
+                         Padding="10" Background="Transparent"
+                         BorderThickness="0"
+                         VerticalAlignment="Stretch"
+                         TextChanged="InputTextBox_TextChanged"/>
+                <TextBlock x:Name="PlaceholderText"
+                           Text="Paste one or more FIX messages here...  (supports  |  ^A  \x01  ^ delimiters)"
+                           Foreground="#A0AEC0" FontFamily="Consolas" FontSize="12"
+                           Padding="12,14,0,0" IsHitTestVisible="False"
+                           Visibility="Visible"/>
+            </Grid>
+        </Border>
+
+        <!-- Buttons row -->
+        <WrapPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,8">
+            <Button x:Name="ParseButton" Content="  Parse  " Margin="0,0,8,0"
+                    Style="{StaticResource PrimaryBtn}"
+                    Click="ParseButton_Click"/>
+            <Button x:Name="ClearButton" Content="  Clear  " Margin="0,0,8,0"
+                    Style="{StaticResource SecondaryBtn}"
+                    Click="ClearButton_Click"/>
+            <Button x:Name="LoadDictButton" Content="Load Custom Tags..." Margin="0,0,8,0"
+                    Style="{StaticResource OutlineBtn}"
+                    Click="LoadDictButton_Click"/>
+            <Button x:Name="CopyButton" Content="Copy as CSV" Margin="0,0,16,0"
+                    Style="{StaticResource OutlineBtn}"
+                    Click="CopyButton_Click"/>
+            <TextBlock x:Name="StatusText" VerticalAlignment="Center"
+                       Foreground="#718096" FontSize="12"/>
+        </WrapPanel>
+
+        <!-- Results DataGrid -->
+        <Border Grid.Row="3" Background="White" CornerRadius="6"
+                BorderBrush="#CBD5E0" BorderThickness="1">
+            <DataGrid x:Name="ResultsGrid"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="#EDF2F7"
+                      AlternatingRowBackground="Transparent"
+                      SelectionMode="Extended"
+                      SelectionUnit="Cell"
+                      ClipboardCopyMode="ExcludeHeader"
+                      CanUserReorderColumns="True"
+                      CanUserResizeColumns="True"
+                      CanUserSortColumns="True"
+                      PreviewMouseRightButtonDown="ResultsGrid_PreviewMouseRightButtonDown">
+
+                <DataGrid.ContextMenu>
+                    <ContextMenu x:Name="GridContextMenu" Style="{x:Null}">
+                        <MenuItem x:Name="MenuCopyCell" Header="Copy Cell" Click="MenuCopyCell_Click">
+                            <MenuItem.Icon>
+                                <TextBlock Text="📋" FontSize="12"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem x:Name="MenuCopyValue" Header="Copy Value" Click="MenuCopyValue_Click"/>
+                        <MenuItem x:Name="MenuCopyTagName" Header="Copy Field Name" Click="MenuCopyTagName_Click"/>
+                        <Separator/>
+                        <MenuItem x:Name="MenuCopyRow" Header="Copy Row (Tab-separated)" Click="MenuCopyRow_Click"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+                      HeadersVisibility="Column"
+                      RowHeight="26"
+                      BorderThickness="0"
+                      Background="Transparent"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto">
+
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Background"
+                                Value="{Binding MessageIndex, Converter={StaticResource MsgBgConv}}"/>
+                    </Style>
+                </DataGrid.RowStyle>
+
+                <DataGrid.CellStyle>
+                    <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#BEE3F8"/>
+                                <Setter Property="BorderBrush" Value="#63B3ED"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.CellStyle>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Msg" Binding="{Binding MessageIndex}" Width="45">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="Foreground" Value="#4A5568"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Sec" Binding="{Binding Section}" Width="58">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Foreground"
+                                        Value="{Binding Section, Converter={StaticResource SectionFgConv}}"/>
+                                <Setter Property="FontSize" Value="11"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Tag" Binding="{Binding Tag}" Width="52">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Foreground" Value="#4A5568"/>
+                                <Setter Property="Padding" Value="0,0,8,0"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Field Name" Binding="{Binding TagName}" Width="190">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="FontWeight"
+                                        Value="{Binding IsGroupCountTag, Converter={StaticResource GroupWeightConv}}"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="180">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="FontFamily" Value="Consolas"/>
+                                <Setter Property="FontSize" Value="12"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Description" Binding="{Binding ValueDescription}" Width="200">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Foreground" Value="#2D7D46"/>
+                                <Setter Property="FontSize" Value="12"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Group Context" Binding="{Binding GroupContext}" Width="*">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Foreground" Value="#744210"/>
+                                <Setter Property="FontSize" Value="11"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- Status bar -->
+        <Border Grid.Row="4" Margin="0,6,0,0">
+            <TextBlock x:Name="FooterText" Foreground="#A0AEC0" FontSize="11"
+                       Text="Ready — paste a FIX message above and click Parse"/>
+        </Border>
+    </Grid>
+</Window>

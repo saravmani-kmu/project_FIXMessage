@@ -1,0 +1,8 @@
+# Custom FIX tags — add your Fidessa / proprietary tags here
+# Format: TagNumber,TagName
+# Lines starting with # are ignored
+#
+# Examples:
+# 9000,FidessaCustomField1
+# 9001,FidessaOrderRef
+# 9002,FidessaBrokerCode
