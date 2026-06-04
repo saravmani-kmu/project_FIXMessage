@@ -3,6 +3,8 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using FIXMessageParser.Services;
 
 namespace FIXMessageParser;
@@ -14,8 +16,9 @@ public partial class TableViewWindow : Window
 
     // Maps DataTable column id → display header (tag name)
     private readonly Dictionary<string, string> _colHeaders = new();
-    // Maps DataTable column id → tag number (for tooltip)
     private readonly Dictionary<string, int> _colTagNumbers = new();
+    private DataRowView? _rightClickedRow;
+    private string _rightClickedColId = string.Empty;
 
     private static readonly int[] HeaderTagOrder = { 8, 9, 35, 49, 56, 34, 52, 50, 57, 115, 116, 128, 129, 43, 97, 122 };
     private static readonly HashSet<int> TrailerTags = new() { 10, 89, 93 };
@@ -193,6 +196,62 @@ public partial class TableViewWindow : Window
     {
         PlaceholderText.Visibility = string.IsNullOrEmpty(InputTextBox.Text)
             ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void ResultsGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        var element = e.OriginalSource as DependencyObject;
+        while (element != null && element is not DataGridCell)
+            element = VisualTreeHelper.GetParent(element);
+
+        if (element is not DataGridCell cell) return;
+
+        _rightClickedRow = cell.DataContext as DataRowView;
+
+        // Get the DataTable column name from the auto-generated column's binding
+        _rightClickedColId = string.Empty;
+        if (cell.Column is DataGridTextColumn col &&
+            col.Binding is System.Windows.Data.Binding binding)
+            _rightClickedColId = binding.Path.Path;
+    }
+
+    private void GridContextMenu_Opened(object sender, RoutedEventArgs e)
+    {
+        if (ResultsGrid.ContextMenu?.Items[0] is not MenuItem copyCell) return;
+
+        if (!string.IsNullOrEmpty(_rightClickedColId))
+        {
+            string displayName = _rightClickedColId == "Msg" ? "Message"
+                : _colHeaders.TryGetValue(_rightClickedColId, out var h) ? h : _rightClickedColId;
+            copyCell.Header = $"Copy  \"{displayName}\"";
+        }
+        else
+        {
+            copyCell.Header = "Copy Cell";
+        }
+    }
+
+    private void MenuCopyCell_Click(object sender, RoutedEventArgs e)
+    {
+        if (_rightClickedRow == null || string.IsNullOrEmpty(_rightClickedColId)) return;
+        string value = _rightClickedRow[_rightClickedColId]?.ToString() ?? string.Empty;
+        SetClipboard(value);
+    }
+
+    private void MenuCopyRow_Click(object sender, RoutedEventArgs e)
+    {
+        if (_rightClickedRow == null) return;
+        var dt = ((DataView)ResultsGrid.ItemsSource).Table!;
+        var values = dt.Columns.Cast<DataColumn>()
+            .Select(c => _rightClickedRow[c.ColumnName]?.ToString() ?? string.Empty);
+        SetClipboard(string.Join("\t", values));
+    }
+
+    private void SetClipboard(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return;
+        Clipboard.SetText(text);
+        StatusText.Text = $"Copied: {(text.Length > 50 ? text[..50] + "…" : text)}";
     }
 
     private static string CsvEscape(string s) =>

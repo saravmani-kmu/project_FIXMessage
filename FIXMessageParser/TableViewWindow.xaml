@@ -167,7 +167,16 @@
                       Background="Transparent"
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Auto"
-                      AutoGeneratingColumn="ResultsGrid_AutoGeneratingColumn"/>
+                      AutoGeneratingColumn="ResultsGrid_AutoGeneratingColumn"
+                      PreviewMouseRightButtonDown="ResultsGrid_PreviewMouseRightButtonDown">
+
+                <DataGrid.ContextMenu>
+                    <ContextMenu Style="{x:Null}" Opened="GridContextMenu_Opened">
+                        <MenuItem Header="Copy Cell" Click="MenuCopyCell_Click"/>
+                        <MenuItem Header="Copy Row (Tab-separated)" Click="MenuCopyRow_Click"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+            </DataGrid>
         </Border>
 
         <!-- Footer -->
