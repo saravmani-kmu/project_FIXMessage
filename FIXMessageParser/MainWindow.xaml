@@ -155,9 +155,12 @@
             <Button x:Name="LoadDictButton" Content="Load Custom Tags..." Margin="0,0,8,0"
                     Style="{StaticResource OutlineBtn}"
                     Click="LoadDictButton_Click"/>
-            <Button x:Name="CopyButton" Content="Copy as CSV" Margin="0,0,16,0"
+            <Button x:Name="CopyButton" Content="Copy as CSV" Margin="0,0,8,0"
                     Style="{StaticResource OutlineBtn}"
                     Click="CopyButton_Click"/>
+            <Button Content="Table View" Margin="0,0,16,0"
+                    Style="{StaticResource OutlineBtn}"
+                    Click="TableViewButton_Click"/>
             <TextBlock x:Name="StatusText" VerticalAlignment="Center"
                        Foreground="#718096" FontSize="12"/>
         </WrapPanel>

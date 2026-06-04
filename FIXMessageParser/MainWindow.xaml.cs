@@ -123,6 +123,13 @@ public partial class MainWindow : Window
             : Visibility.Collapsed;
     }
 
+    private void TableViewButton_Click(object sender, RoutedEventArgs e)
+    {
+        var win = new TableViewWindow(_dictService, _parserService);
+        win.Owner = this;
+        win.Show();
+    }
+
     private void ResultsGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
         // Walk up the visual tree from the click source to find the DataGridCell
